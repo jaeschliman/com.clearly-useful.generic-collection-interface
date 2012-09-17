@@ -65,3 +65,9 @@
   the file test.lisp defines some data structures, each implementing
   one of the three major protocols & confirms that they translate
   among each other correctly.
+
+** TODO fix warning on sbcl
+   (doseq (x #(0 1 2) (* x x))
+      (declare (type fixnum x)))
+   is generating what appear to be useless type
+   warnings at the moment. (with or without the declare)
