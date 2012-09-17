@@ -1,0 +1,67 @@
+#+TITLE: generic collection interface for common lisp
+
+* com.clearly-useful.generic-collection-interface
+
+  a package for working with data structures generically in common
+  lisp, inspired by clojure. the aim of this package is to provide
+  simple protocols and a few generic functions that support working
+  with data structures as abstractions, instead of writing to their
+  specific implementations.
+
+  the abstractions are defined in one place so that they may
+  interoperate cleanly. Any object implementing one of the three major
+  protocols will have a default method to convert to the other
+  two. see =base-cases.lisp= for details.
+
+  Note that this package depends on version 0.1 of
+  com.clearly-useful.protocols, which is not yet in quicklisp.
+  
+* the three major protocols
+
+  This package defines three major protocols:
+  =seq=, =associative=, =indexable=, and one
+  minor protocol =countable=, which is required
+  by =indexable=. Each of the major protocols
+  may be implemented individually, and seperate systems
+  are provided for each which define packages exporting
+  only those symbols needed by the protocol.
+
+  Implementations are provided for these protocols for the built-in
+  collection types. See =builtins.lisp= for details.
+
+** =seq=
+   This protocol provides a list-like abstraction with
+   the methods =head= and =tail=.
+
+   see [[https://github.com/jaeschliman/com.clearly-useful.sequence-protocol][here]] for details.
+
+** =associative=
+
+   This protocol provides a dictionary-like abstraction with the
+   methods =all-keys=, =all-values=, =contains-key-p=, and
+   =value-for-key=.
+
+   see [[https://github.com/jaeschliman/com.clearly-useful.associative-protocol][here]] for details. 
+   
+   
+** =indexable=
+
+   This protocol provides a vector-like abstraction, and depends on
+   the =countable= protocol, which provides the methods =counted-p=
+   and =count-elements=.  =indexable= itself defines one method,
+   =element-at=
+   
+   see [[https://github.com/jaeschliman/com.clearly-useful.indexable-protocol][here]] for details.
+
+* exported symbols
+
+  See [[https://github.com/jaeschliman/com.clearly-useful.generic-collection-interface/blob/master/package.lisp][package.lisp]] for a list of all exported symbols.
+
+  For in depth information each protocol and their associated symbols,
+  visit the links to the individual protocol systems above.
+  
+* notes & todos
+
+  the file test.lisp defines some data structures, each implementing
+  one of the three major protocols & confirms that they translate
+  among each other correctly.
