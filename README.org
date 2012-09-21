@@ -1,5 +1,20 @@
 #+TITLE: generic collection interface for common lisp
 
+* warning
+  
+  note that this is a work in progress, (version 0.1), and the
+  interface (and some semantics) will change.This package is an
+  implementation package, and exports many symbols. There are other
+  packages under com.clearly-useful that provide smaller interfaces to
+  be used ala carte (see below)
+
+  work is also ongoing to bring basic clojure style reducers and folding
+  to common lisp using lparallel, and some of the implementation of those
+  will move to this package in the future, as well as some generic
+  operations like conj & into, etc. long story short, the export list
+  of this package is in flux, the only promise I can make at this
+  point is that nothing exported will clash with cl.
+
 * com.clearly-useful.generic-collection-interface
 
   a package for working with data structures generically in common
@@ -7,6 +22,11 @@
   simple protocols and a few generic functions that support working
   with data structures as abstractions, instead of writing to their
   specific implementations.
+
+  there are many interesting data structure libraries written for
+  common lisp, this package is an attempt to provide an interface
+  simple and general enough that built in types and user types
+  may be used interchangeably.  
 
   the abstractions are defined in one place so that they may
   interoperate cleanly. Any object implementing one of the three major
