@@ -1,6 +1,10 @@
 #+TITLE: generic collection interface for common lisp
 
 * warning
+
+  *DEVELOP BRANCH*
+  these docs are not relevant to the develop branch.
+  read the source & tests, or wait a few days.
   
   note that this is a work in progress, (version 0.1), and the
   interface (and some semantics) will change.This package is an
@@ -91,3 +95,5 @@
       (declare (type fixnum x)))
    is generating what appear to be useless type
    warnings at the moment. (with or without the declare)
+** TODO fix hash-table weakness
+   (empty h-t) not yet aware of hash table weakness

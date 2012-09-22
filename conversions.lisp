@@ -26,6 +26,12 @@ the lower bound of range, or nil"
 		  :high (%range-high range))))
 
 (extend-type %range
+  collection
+  (empty (range) (make-%range :low 0 :high 0))
+  
+  seqable
+  (seq (range) (when (plusp (%range-size range))
+		 range))
   seq
   (head (range) (%range-low range))
   (tail (range) (%next-range range))
@@ -53,6 +59,10 @@ the lower bound of range, or nil"
   (defstruct %countable-sequence
     length index countable))
 
+(defun %countable-sequence-size (c)
+  (- (%countable-sequence-length c)
+     (%countable-sequence-index c)))
+
 (defun %next-countable-sequence (c)
   (let ((length (%countable-sequence-length c))
 	(new-index (1+ (%countable-sequence-index c))))
@@ -63,12 +73,19 @@ the lower bound of range, or nil"
        :countable (%countable-sequence-countable c)))))
 
 (defun %countable-to-seq (countable)
-  (make-%countable-sequence
-   :length (count-elements countable)
-   :index 0
-   :countable countable))
+  (when (plusp (count-elements countable))
+    (make-%countable-sequence
+     :length (count-elements countable)
+     :index 0
+     :countable countable)))
 
 (extend-type %countable-sequence
+  collection
+  (empty (c) (%countable-to-seq (empty (%countable-sequence-countable c))))
+  
+  seqable
+  (seq (c) (when (plusp (%countable-sequence-size c))
+	     c))
   seq
   (head (c) (element-at (%countable-sequence-countable c)
 			(%countable-sequence-index c)))
@@ -88,6 +105,11 @@ the lower bound of range, or nil"
    :countable countable))
 
 (extend-type %countable-associative
+  collection
+  (empty (o)
+	 (%countable-to-associative
+	  (empty (%countable-associative-countable o))))
+  
   associative
   (all-keys (o) (make-%range :low 0
 			     :high (%countable-associative-length o)))
@@ -161,12 +183,16 @@ the lower bound of range, or nil"
 
 
 (defun %seq-to-countable (seq)
-  (make-%seq-countable
-   :seq seq
-   :ubound -1
-   :fully-counted nil))
+  (when seq
+    (make-%seq-countable
+     :seq seq
+     :ubound -1
+     :fully-counted nil)))
 
 (extend-type %seq-countable
+  collection
+  (empty (o) (%seq-to-countable (empty (%seq-countable-seq o))))
+  
   countable
   (counted-p (o) (declare (ignore o)) nil)
   (count-elements (o) (%seq-countable-count o))
