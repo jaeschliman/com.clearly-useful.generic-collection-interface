@@ -21,7 +21,11 @@
   (all-keys (o) nil)
   (all-values (o) nil)
   (contains-key-p (o k) nil)
-  (value-for-key (o k) (%seq-nth-or-error o k)))
+  (value-for-key (o k) (%seq-nth-or-error o k))
+
+  reduceable
+  (coll-reduce (self fn seed) (declare (ignorable self)
+				       (ignorable fn)) seed))
 
 (extend-type cons
   collection
@@ -47,7 +51,13 @@
 		  (and (integerp key))
 		  (<= -1 key (count-elements o)))
   (value-for-key (o index)
-		 (%seq-nth-or-error o index)))
+		 (%seq-nth-or-error o index))
+
+  reduceable
+  (coll-reduce (self fn seed)
+	       (let ((r seed))
+		 (doseq (v self r)
+		   (setf r (funcall fn r v))))))
 
 
 (extend-type vector
@@ -81,7 +91,14 @@
 		  (and (integerp key)
 		       (<= -1 key (length it))))
   (value-for-key (it key)
-		 (elt it key)))
+		 (elt it key))
+
+  reduceable
+  (coll-reduce (self fn seed) (reduce fn self :initial-value seed))
+
+  foldable
+  (coll-fold (self n combinef reducef)
+	     (fold-vector self n combinef reducef)))
 
 (extend-type array
   ;;should this retain the dimensionality of array
@@ -124,7 +141,15 @@
 			       :displaced-to it
 			       :displaced-index-offset 0
 			       :element-type
-			       (array-element-type it))))
+			       (array-element-type it)))
+
+  reduceable
+  (coll-reduce (self fn seed)
+	       (reduce fn (make-array (array-total-size self)
+				      :displaced-to self
+				      :displaced-index-offset 0
+				      :element-type (array-element-type self))
+		       seed)))
 
 
 
@@ -172,7 +197,15 @@
 		 (if (contains-key-p o k)
 		     (prog1 (gethash k o))
 		     (error "no such key ~S in ~S"
-			    k o))))
+			    k o)))
+
+  reduceable
+  (coll-reduce (self fn seed)
+	       (let ((r seed))
+		 (maphash (lambda (k v)
+			    (setf r (funcall fn r (list k v))))
+			  self)
+		 r)))
 
 
 

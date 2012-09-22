@@ -31,3 +31,18 @@
     (associative (%seq-to-countable (seq o)))
     (t (error "no method to convert ~S ~S to ~S"
 	      (class-of o) o 'countable))))
+
+
+(defmethod coll-reduce (self fn seed)
+   (etypecase self
+     (indexable (if (counted-p self)
+		    (reduce-indexable self fn seed)
+		    (reduce-seq (seq self) fn seed)))
+     (seq (reduce-seq self fn seed))
+     (iterator (reduce-iterator self fn seed))
+     (associative (reduce-seq (seq self) fn seed))
+     (t (error "Don't know how to ~S ~S" 'coll-reduce self))))
+
+(defmethod coll-fold (self n cm rd)
+  (declare (ignore n))
+  (fold-left rd self :initial-value (funcall cm)))

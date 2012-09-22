@@ -41,3 +41,16 @@ associative and seq."
   (value-for-key (o k) "returns the value of k in o or raises an error"))
 
 
+
+(defprotocol reduceable
+  ""
+  ;;multi-arity & optional args not yet supported
+  (coll-reduce (self fn seed))
+  )
+;;;;;;;
+
+;; see https://github.com/clojure/clojure/blob/master/src/clj/clojure/core/reducers.clj
+
+(defprotocol foldable
+  ""
+  (coll-fold (self n combinef reducef)))

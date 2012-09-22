@@ -2,7 +2,8 @@
 
 (defpackage #:com.clearly-useful.generic-collection-interface
   (:use #:cl
-	#:com.clearly-useful.protocols)
+	#:com.clearly-useful.protocols
+	#:lparallel)
 
   (:export
    ;;the collection protocol
@@ -65,6 +66,8 @@
    #:empty-p
    #:conj
    #:into
+   #:monoid
+   
    )
    
   (:export
@@ -87,6 +90,11 @@
    ;; maybe something that integrates seq/reducers etc...
    ;; defining macro or something
    #:defcurried  ;;(this isn't it)
+
+   #:mapping
+   #:filtering
+   #:mapcatting
+   
    
    #:fmap
    #:fmapcat
