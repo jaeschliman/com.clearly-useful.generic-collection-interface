@@ -1,88 +1,138 @@
 #+TITLE: generic collection interface for common lisp
 
-* warning
+* overview
 
-  *DEVELOP BRANCH*
-  these docs are not relevant to the develop branch.
-  read the source & tests, or wait a few days.
-  
-  note that this is a work in progress, (version 0.1), and the
-  interface (and some semantics) will change.This package is an
-  implementation package, and exports many symbols. There are other
-  packages under com.clearly-useful that provide smaller interfaces to
-  be used ala carte (see below)
+  This package provides several related protocols and a few functions
+  for collection manipulation in common lisp, and implementations for
+  built-in types. It includes an interface for clojure-style reducers.
+  While this package may be used to simply consume collections,
+  it does not contain many utility functions for doing so, as
+  it is intended to be used by implementors that wish to provide
+  a clean interface to their own collection classes. 
+  None of the symbols exported by this package clash
+  with common lisp.
 
-  work is also ongoing to bring basic clojure style reducers and folding
-  to common lisp using lparallel, and some of the implementation of those
-  will move to this package in the future, as well as some generic
-  operations like conj & into, etc. long story short, the export list
-  of this package is in flux, the only promise I can make at this
-  point is that nothing exported will clash with cl.
+* justification
 
-* com.clearly-useful.generic-collection-interface
+  There are many quality data structure libraries for common lisp,
+  but they have disparate interfaces, and swapping in a new collection
+  type to existing code can be painful. This library is an attempt
+  to provide a sufficiently generic set of protocols so that code written
+  to them may use any data structure appropriate to the task at hand
+  without difficulty. 
 
-  a package for working with data structures generically in common
-  lisp, inspired by clojure. the aim of this package is to provide
-  simple protocols and a few generic functions that support working
-  with data structures as abstractions, instead of writing to their
-  specific implementations.
+* design
 
-  there are many interesting data structure libraries written for
-  common lisp, this package is an attempt to provide an interface
-  simple and general enough that built in types and user types
-  may be used interchangeably.  
+  The design of this library is modelled quite a bit after clojure,
+  but it is written to integrate with common lisp. None of the symbols
+  exported by this package clash with the cl package, and the code
+  follows cl naming conventions. There are several packages related
+  to this one that simply export a subset of it's interface. These
+  packages are to help implementors who don't want to import the
+  entire collection interface just to implement a certain aspect 
+  of it.
 
-  the abstractions are defined in one place so that they may
-  interoperate cleanly. Any object implementing one of the three major
-  protocols will have a default method to convert to the other
-  two. see =base-cases.lisp= for details.
+* protocol overview
 
-  Note that this package depends on version 0.1 of
-  com.clearly-useful.protocols, which is not yet in quicklisp.
-  
-* the three major protocols
+  This package defines several protocols for working with
+  collections, some of which are interrelated.
 
-  This package defines three major protocols:
-  =seq=, =associative=, =indexable=, and one
-  minor protocol =countable=, which is required
-  by =indexable=. Each of the major protocols
-  may be implemented individually, and seperate systems
-  are provided for each which define packages exporting
-  only those symbols needed by the protocol.
+** =collection=
+   This is the base protocol for the library.
+   A collection responds to two methods:
 
-  Implementations are provided for these protocols for the built-in
-  collection types. See =builtins.lisp= for details.
+   =empty= -> produce an empty collection
+   =empty-p= -> whether the collection is empty
 
+** =seqable=
+   A thing which may be converted to a seq.  This protocol
+   defines the method =seq= which serves a bit of a double duty: it
+   may be used to create a list-like object from another, but should
+   always return /nil/ when it's result is empty. For example, given a
+   (hypothetical) unordered set which implements =collection= and
+   =seqable=:
+#begin_src lisp
+   a ;=> {2 1 3}
+   (empty a) ;=> {}
+   (empty-p a) ;=> nil
+   (empty-p (empty a)) ;=> t
+   (seq a) ; => (3 2 1) or similar
+   (seq (empty a)) ;=> nil
+#end_src
+   
+   
 ** =seq=
+   requires =collection=, =seqable=
    This protocol provides a list-like abstraction with
    the methods =head= and =tail=.
 
    see [[https://github.com/jaeschliman/com.clearly-useful.sequence-protocol][here]] for details.
+ 
 
 ** =associative=
-
+   requires =collection=
    This protocol provides a dictionary-like abstraction with the
    methods =all-keys=, =all-values=, =contains-key-p=, and
    =value-for-key=.
 
    see [[https://github.com/jaeschliman/com.clearly-useful.associative-protocol][here]] for details. 
    
+
+** =countable=
+   requires =collection=
+   A collection that may be counted.
+   =counted-p= -> bool, whether count-elements is o(1)
+   =count-elements= -> number
    
 ** =indexable=
-
-   This protocol provides a vector-like abstraction, and depends on
-   the =countable= protocol, which provides the methods =counted-p=
-   and =count-elements=.  =indexable= itself defines one method,
-   =element-at=
+   requires =collection=, =countable=
+   This protocol provides a vector-like abstraction
+   with the method =element-at=
    
    see [[https://github.com/jaeschliman/com.clearly-useful.indexable-protocol][here]] for details.
 
+** =reduceable=
+   a thing which can reduce itself via =coll-reduce=
+   used to implement clojure-style reducers.
+   
+** =foldable=
+   a thing which can fold itself via =coll-fold=
+   ditto reducable, includes a parallel implementation
+   for common lisp vectors.
+   
+* additional functions
+** additional associative functions
+   all-keys-and-values
+   getkey
+   
+** fold-left, fold
+   reducer interface. fold-left is reduce, but that name is
+   taken. do not (yet?) support :from-end
+   
+** additional reducer functions
+   this package also exports functions
+   to aid in constructing reducers (see the reducers package)
+   monoid, reduced, reducer, folder, mapping, filtering, mapcatting
+   
+** conj & into
+   (conj coll val) -> new collection w/val
+   as in clojure
+      (conj '(a) b) -> (b a)
+      (conj #(a) b) -> #(a b)
+
+   (into coll reduceable) -> new collection
+   essentially == (fold-left #'conj reduceable :initial-value coll)
+    (into #() '(1 2 3)) -> #(1 2 3)
+    (into nil '(1 2 3)) -> (3 2 1)
 * exported symbols
 
   See [[https://github.com/jaeschliman/com.clearly-useful.generic-collection-interface/blob/master/package.lisp][package.lisp]] for a list of all exported symbols.
 
   For in depth information each protocol and their associated symbols,
   visit the links to the individual protocol systems above.
+
+  The file builtins.lisp contains the protocol implementations
+  for many built-in common lisp types.
   
 * notes & todos
 
@@ -97,3 +147,7 @@
    warnings at the moment. (with or without the declare)
 ** TODO fix hash-table weakness
    (empty h-t) not yet aware of hash table weakness
+
+** TODO write examples/demo, more docs
+   better to factor them out among the
+   sub-packages

@@ -5,7 +5,7 @@
   :description "Describe com.clearly-useful.generic-collection-interface here"
   :author "Jason Aeschliman <j.aeschliman@gmail.com>"
   :license "revised BSD"
-  :version "0.1"
+  :version "0.2"
   :depends-on (#:com.clearly-useful.protocols
 	       #:bordeaux-threads
 	       #:lparallel)
