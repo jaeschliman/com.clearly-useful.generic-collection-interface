@@ -28,6 +28,7 @@ the lower bound of range, or nil"
 (extend-type %range
   collection
   (empty (range) (make-%range :low 0 :high 0))
+  (empty-p (range) (not (plusp (%range-size range))))
   
   seqable
   (seq (range) (when (plusp (%range-size range))
@@ -82,6 +83,7 @@ the lower bound of range, or nil"
 (extend-type %countable-sequence
   collection
   (empty (c) (%countable-to-seq (empty (%countable-sequence-countable c))))
+  (empty-p (c) (empty-p (%countable-sequence-countable c)))
   
   seqable
   (seq (c) (when (plusp (%countable-sequence-size c))
@@ -109,6 +111,8 @@ the lower bound of range, or nil"
   (empty (o)
 	 (%countable-to-associative
 	  (empty (%countable-associative-countable o))))
+  (empty-p (o)
+	   (empty-p (%countable-associative-countable o)))
   
   associative
   (all-keys (o) (make-%range :low 0
@@ -192,6 +196,7 @@ the lower bound of range, or nil"
 (extend-type %seq-countable
   collection
   (empty (o) (%seq-to-countable (empty (%seq-countable-seq o))))
+  (empty-p (o) (empty-p (%seq-countable-seq o)))
   
   countable
   (counted-p (o) (declare (ignore o)) nil)

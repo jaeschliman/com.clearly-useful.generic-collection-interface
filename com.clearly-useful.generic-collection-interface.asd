@@ -13,6 +13,7 @@
   :components ((:file "package")
 	       (:file "features")
 	       (:file "protocols")
+	       (:file "internal-utils")
 	       (:file "macros")
 	       (:file "methods")
 	       (:file "conversions")
@@ -23,6 +24,5 @@
 	       (:file "conj")
 	       (:file "parallel")
 	       (:file "builtins")
-	       (:file "reducers")
                (:file "com.clearly-useful.generic-collection-interface")))
 

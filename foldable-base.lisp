@@ -1,16 +1,17 @@
 (in-package :com.clearly-useful.generic-collection-interface)
 
-(defvar *fold-kernel* nil)
 
 ;;; TODO: pick a kernel.
 ;;; testing is easier with just one
 ;;; kernel, but may change.
 
-(defmacro with-fold-kernel (&body body)
-  `(let ((lparallel:*kernel* (or *fold-kernel*
-				 (setf *fold-kernel*
-				       (lparallel:make-kernel 4)))))
-     ,@body))
+;; (defvar *fold-kernel* nil)
+
+;; (defmacro with-fold-kernel (&body body)
+;;   `(let ((lparallel:*kernel* (or *fold-kernel*
+;; 				 (setf *fold-kernel*
+;; 				       (lparallel:make-kernel 4)))))
+;;      ,@body))
 
 
 (defmacro with-fold-kernel (&body body)
@@ -21,14 +22,15 @@
      ,@body))
 
 
-;;maybe change the signature of this?
 (defun fold (reducefn collection
 	     &key
 	       (divide-by 512)
 	       (combine-with reducefn))
+
   #+com.clearly-useful.threading-supported 
   (with-fold-kernel
     (coll-fold collection divide-by combine-with reducefn))
+
   #-com.clearly-useful.threading-supported
   (fold-left reducefn collection :initial-value (funcall combine-with)))
 

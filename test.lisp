@@ -70,6 +70,8 @@
 (extend-type kons
   collection
   (empty (o) *knil*)
+  (empty-p (o) (eq o *knil*))
+  
   seqable
   (seq (o) (unless (eq o *knil*)
 	     o))
@@ -87,6 +89,7 @@
 (extend-type vektor
   collection
   (empty (o) (declare (ignorable o)) (vektor))
+  (empty-p (o) (empty-p (vektor-v o)))
 
   countable
   (counted-p (o) (declare (ignorable o)) t)
@@ -101,6 +104,7 @@
 (extend-type dikt
   collection
   (empty (o) (declare (ignorable o)) (dikt))
+  (empty-p (o) (empty-p (dikt-v o)))
   
   associative
   (all-keys (o)

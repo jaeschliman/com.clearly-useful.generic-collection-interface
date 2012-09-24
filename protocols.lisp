@@ -1,8 +1,9 @@
 (in-package #:com.clearly-useful.generic-collection-interface)
 
 (defprotocol collection
-  "a collection can produce an empy version of itself"
-  (empty (o) "an empty version of this collection"))
+  "a collection knows if it is empty, and can produce an empty version of itself"
+  (empty (o) "an empty version of this collection")
+  (empty-p (o) "wether this collection is empty"))
 
 (defprotocol countable
   "countable collection"

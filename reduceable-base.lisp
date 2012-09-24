@@ -6,8 +6,6 @@
 	(funcall fn result value)
 	epsilon)))
 
-
-
 (defun reduce-indexable (r fn seed)
   (let ((result seed))
     (doindexable (v r result)
@@ -16,11 +14,6 @@
 (defun reduce-seq (r fn seed)
   (let ((result seed))
     (doseq (v r result)
-      (setf result (funcall fn result v)))))
-
-(defun reduce-iterator (r fn seed)
-  (let ((result seed))
-    (do-iterator (v r result)
       (setf result (funcall fn result v)))))
 
 (defun reduced (v)
@@ -71,13 +64,4 @@
     (lambda (result value)
       (fold-left f1 result
 			 :initial-value (funcall f value)))))
-
-;;;;;;; r*
-
-(defun rmap (f collection)
-  (reducer collection (mapping f)))
-(defun rfilter (pred collection)
-  (reducer collection (filtering pred)))
-(defun rmapcat (f collection)
-  (reducer collection (mapcatting f)))
 

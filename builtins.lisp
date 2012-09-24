@@ -3,6 +3,7 @@
 (extend-type null
   collection
   (empty (o) nil)
+  (empty-p (o) t)
   
   seqable
   (seq (o) nil)
@@ -20,8 +21,8 @@
   associative
   (all-keys (o) nil)
   (all-values (o) nil)
-  (contains-key-p (o k) nil)
-  (value-for-key (o k) (%seq-nth-or-error o k))
+  (contains-key-p (o k) (declare (ignorable o k)) nil)
+  (value-for-key (o k) (%seq-nth-or-error o k)) ;;to give the right error message
 
   reduceable
   (coll-reduce (self fn seed) (declare (ignorable self)
@@ -30,6 +31,7 @@
 (extend-type cons
   collection
   (empty (o) nil)
+  (empty-p (o) nil)
   
   seqable
   (seq (o) o)
@@ -64,6 +66,7 @@
   collection
   (empty (it) (make-array 0
 			  :element-type (array-element-type it)))
+  (empty-p (it) (zerop (length it)))
   
   seqable
   (seq (it) (when (plusp (length it))
@@ -109,7 +112,7 @@
   (empty (it) (make-array (make-list (array-rank it)
 				     :initial-element 0)
 			  :element-type (array-element-type it)))
-  
+  (empty-p (it) (zerop (array-total-size it)))
   
   seqable
   (seq (it) (when (plusp (array-total-size it))
@@ -118,15 +121,6 @@
 			  :displaced-index-offset 0
 			  :element-type
 			  (array-element-type it))))
-
-  #|  seq
-  (head (it) (row-major-aref it 0))
-  (tail (it) (make-array (1- (array-total-size it))
-			 :displaced-to it
-			 :displaced-index-offset 1
-			 :element-type
-			 (array-element-type it)))
-  |#
   
   countable
   (counted-p (it) t)
@@ -149,7 +143,7 @@
 				      :displaced-to self
 				      :displaced-index-offset 0
 				      :element-type (array-element-type self))
-		       seed)))
+		       :initial-value seed)))
 
 
 
@@ -158,23 +152,12 @@
      using (hash-value v)
      collect (list k v)))
 
-#-ccl
-(defun %empty-hash (it)
-  (make-hash-table
-	       :test (hash-table-test it)
-	       :size 0))
-#+ccl
-(defun %empty-hash (it)
-  (make-hash-table
-	       :test (hash-table-test it)
-	       :size 0
-	       :weak (ccl:hash-table-weak-p it)
-	       ;; TODO : add other options ?
-	       ))
 
 (extend-type hash-table
   collection
   (empty (it) (%empty-hash it))
+  (empty-p (it) (zerop (hash-table-count it)))
+  
   seqable
   (seq (it) (when (plusp (hash-table-count it))
 	      (all-keys-and-values it)))
