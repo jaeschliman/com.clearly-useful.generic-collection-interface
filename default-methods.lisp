@@ -10,8 +10,8 @@
 
 ;; indexable
 
-;;;; still not sure what to do with
-;;;; indexable.
+(defmethod element-at (thing n)
+  (element-at (indexable thing) n))
 
 ;; seq
 
