@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:com.clearly-useful.generic-collection-interface
   :serial t
-  :description "Describe com.clearly-useful.generic-collection-interface here"
+  :description "generic collection interfaces for common lisp"
   :author "Jason Aeschliman <j.aeschliman@gmail.com>"
   :license "revised BSD"
   :version "0.2"
@@ -24,5 +24,8 @@
 	       (:file "conj")
 	       (:file "parallel")
 	       (:file "builtins")
-               (:file "com.clearly-useful.generic-collection-interface")))
+               (:file "com.clearly-useful.generic-collection-interface"))
+
+  :properties ((:com.clearly-useful
+		:test :auto)))
 
