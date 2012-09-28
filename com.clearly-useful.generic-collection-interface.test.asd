@@ -10,5 +10,14 @@
   
   :components ((:module #:test
 		       :components
-		       ((:file "test")))))
+		       ((:file "test")
+			(:file "collection")
+			(:file "sequence")
+			(:file "countable")
+			(:file "indexable")
+			(:file "associative")
+			(:file "reduceable")
+			(:file "foldable")
+			
+			))))
 

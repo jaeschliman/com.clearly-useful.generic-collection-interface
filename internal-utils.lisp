@@ -32,3 +32,23 @@
 	       :weak (ccl:hash-table-weak-p it)
 	       ;; TODO : add other options ?
 	       ))
+
+
+(defun %interface-package (name
+			   documentation
+			   &rest exports)
+  (let ((master (intern (package-name *package*)
+			:keyword))
+	(name (intern (string name)
+		      :keyword)))
+    `(defpackage ,name
+       (:use :cl ,master)
+       (:documentation ,documentation)
+       (:export ,@exports))))
+
+(defmacro define-interface-package (name documentation
+				     &rest exports)
+  "create a package named name with documentation
+which uses :cl and *package*, exporting the symbols
+of exports."
+  (apply #'%interface-package name documentation exports))
