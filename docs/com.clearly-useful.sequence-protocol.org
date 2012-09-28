@@ -1,0 +1,123 @@
+#+TITLE: simple generic sequences for common lisp
+
+* com.clearly-useful.sequence-protocol
+
+     simple generic user extensible sequence protocol for Common
+  Lisp, inspired by Clojure.
+
+  *Overview:*
+    This package provides a simple abstraction, the =seq= protocol,
+  and implementations for it on several basic common lisp types.
+  direct implementations are provided for
+  =vector=, =cons=, and =null=, with a fall-back
+  method on =t= calling out to the generic function =seq=.
+  an implementation for hash-tables is provided via this method.
+    This package also provides a simple iteration construct,
+  =doseq=.
+  
+    The =seq= protocol defines two methods, =head= and =tail=
+  analogous to =car= and =cdr=.
+
+  *Interface:*
+  this package defines two protocols:
+  =seqable=, with one method =seq=,
+
+  =seq=, with two methods, =head=
+  and =tail=, similar in spirit to clojure's =ISeq= interface,
+  a macro, =doseq=, and one function =seq-to-list=
+
+  note that this package is simply reexporting symbols from
+  the generic collection interface package, and providing
+  some additional tests. It is meant to be useful if  you
+  wish to implement the =seq= protocol with minimal symbol
+  pollution to your package.
+
+  
+* Exported Symbols
+  this package exports the symbols needed to implement
+  the seq protocol in a package using :com.clearly-useful.protocols.
+
+  as the seq protocol depends on seqable and countable,
+  those protocols are exported too.
+  
+** seq
+   /type/
+   this is the type defined by the =seq= protocol
+   e.g.
+   #+begin_src lisp
+   (typep '(a b c) 'seq) ;=> t
+   #+end_src
+** seq
+   /generic function/
+   this method is defined by the =seqable= protocol.
+   it is implemented after the function of the same
+   name in clojure, that is
+   for any collection c:
+     if (empty-p c) == t then (seq c) == nil
+     else if (seq-p c) then (seq c) == c
+     else if (seqable-p c) then (seq c) == d
+     where d == nil | (and (seq-p d) (not (empty-p d)))
+
+   a default method is implemented for seq that provides
+   conversions for objects implementing indexable
+   and associative
+   =seq= is called by the base methods of =head= and =tail=,
+   as well as by =doseq=
+
+** seq-p
+   /function/
+   this is the predicate defined by the =seq= protocol.
+
+   note an important distinction to those coming from clojure:
+   in common lisp, strings are a subtype of vector, so
+   =(seq-p "foo")= will return =t=
+
+** head
+   /protocol method/
+   analogous to =car=
+
+** tail
+   /protocol method/
+   analogous to =cdr=
+   
+** doseq
+   /macro/
+   analogous to =dolist=
+   note that seqs may be infinite in length.
+   
+** seq-to-list
+   /function/
+   (seq-to-list o) => list or nil
+   convenience function. calls
+   seq on its argument, and turns
+   it into a list
+   
+* Notes
+
+  the =seq= protocol as defined here
+  is essentially an abstraction
+  of the cons cell, which allows for
+  extensibility into e.g. lazy sequences
+  etc. such extensions are beyond the scope of
+  this project, but simple enough to do.
+
+  note that =doseq= and friends expect well-formed seqs, e.g.
+  
+  #+begin_src lisp
+  (defun count-seq (seq)
+     (length (seq-to-list seq)))
+
+  (count-seq '(a #(b c))) ;=> 2
+  (count-seq '(a . #(b c))) ;=> 3
+  (count-seq '(a . b)) ;=> /error!/
+
+  (doseq (x '(a . b))
+    (frob x)) ;; frobs a, error on
+              ;; (seq 'b)
+  #+end_src
+
+  
+* Implementation
+
+  this is an interface package. the implementation may be found in the
+  com.clearly-useful.generic-collection-interface package.

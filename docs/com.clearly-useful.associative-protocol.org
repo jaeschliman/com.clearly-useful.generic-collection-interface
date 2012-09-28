@@ -1,0 +1,104 @@
+#+TITLE: a simple associative protocol for common lisp
+
+* com.clearly-useful.associative-protocol
+
+  This package provides a simple read-only dictionary-like protocol
+  =associative=, and default implementations for built-in types in
+  common lisp, inspired by clojure.
+
+  Note that this package is simply reexporting the =associative=
+  interface from =com.clearly-useful.generic-collection-interface=.
+
+  Tests of the =associative= protocol over built in types
+  are provided in test.lisp.
+
+** *Overview*:
+
+   The =associative= protocol defines 4 protocol methods & a few
+   associated generic functions that operate via the protocol, but may
+   be overriden for efficiency. It also defines a generic function,
+   =associative= which functions as identity for objects implementing
+   the protocol, and as a conversion function for objects that may not
+   directly implement this protocol, but can provide a surrogate which
+   does.
+   
+   This package also integrates with the =seq= & =indexable= protocols.
+   
+
+   required methods:
+    - =all-keys= 
+      return a seq of all keys in an object
+    - =all-values=
+      return a seq of all values in an object
+    - =contains-key-p=
+      return whether object contains key
+    - =value-for-key=
+      return value of key in object or raise
+      an error.
+   
+   additional methods:
+    - =all-keys-and-values=
+      return a seq of proper lists (key value)
+    - =getkey=
+      return the value of key for object, or
+      optional default if not found.
+   
+   
+* exported symbols
+
+** associative
+   /protocol/
+   the associative protocol
+
+   /type/
+   the type of objects implementing the protocol
+   
+   /generic function/
+   the generic function defined by the associative
+   protocol. functions as identity for any object
+   implementing associative, and provides defaults
+   for objects implementing seq or indexable.
+
+** associative-p
+   /function/
+   the test function for the protocol
+
+** all-keys
+   /protocol method/
+   (all-keys o) => seq
+   a seq of all keys in object, or nil.
+
+** all-values
+   /protocol method/
+   (all-values o) => seq
+   a seq of all values in object, or nil.
+
+** contains-key-p
+   /protocol method/
+   (contains-key-p object key) => boolean
+   whether object contains key
+
+** value-for-key
+   /protocol method/
+   (value-for-key object key) => value
+   returns the value of key in object, or
+   raises an error
+
+** all-keys-and-values
+   /generic function/
+   (all-keys-and-values o) => seq of (key value), or nil
+   returns a seq of proper lists in the form
+   (key value) for each key and value in o. a default
+   implementation is provided for objects implementing
+   associative, may be overriden for efficiency.
+
+** getkey
+   /function/
+   (getkey object key [default=nil]) => value
+   returns the value of key in object or
+   default if not found. implemented in terms
+   of the associative protocol
+
+* notes & todos
+
+** TODO tests specific to this package.

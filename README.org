@@ -2,14 +2,17 @@
 
 * overview
 
-  This package provides several related protocols and a few functions
+  This system provides several related protocols and a few functions
   for collection manipulation in common lisp, and implementations for
   built-in types. It includes an interface for clojure-style reducers.
-  While this package may be used to simply consume collections,
+  While this system may be used to simply consume collections,
   it does not contain many utility functions for doing so, as
   it is intended to be used by implementors that wish to provide
-  a clean interface to their own collection classes. 
-  None of the symbols exported by this package clash
+  a clean interface to their own collection classes.
+  As a convenience, interface packages are provided for each of the protocols
+  defined which export only the symbols relevant to that
+  protocol. (see com.clearly-useful.generic-collection-interface.lisp)
+  None of the symbols exported by this system clash
   with common lisp.
 
 * justification
@@ -65,8 +68,6 @@
    requires =collection=, =seqable=
    This protocol provides a list-like abstraction with
    the methods =head= and =tail=.
-
-   see [[https://github.com/jaeschliman/com.clearly-useful.sequence-protocol][here]] for details.
  
 
 ** =associative=
@@ -74,8 +75,6 @@
    This protocol provides a dictionary-like abstraction with the
    methods =all-keys=, =all-values=, =contains-key-p=, and
    =value-for-key=.
-
-   see [[https://github.com/jaeschliman/com.clearly-useful.associative-protocol][here]] for details. 
    
 
 ** =countable=
@@ -88,8 +87,6 @@
    requires =collection=, =countable=
    This protocol provides a vector-like abstraction
    with the method =element-at=
-   
-   see [[https://github.com/jaeschliman/com.clearly-useful.indexable-protocol][here]] for details.
 
 ** =reduceable=
    a thing which can reduce itself via =coll-reduce=
@@ -106,24 +103,7 @@
    getkey
    
 ** fold-left, fold
-   reducer interface. fold-left is reduce, but that name is
-   taken. do not (yet?) support :from-end
-   
-** additional reducer functions
-   this package also exports functions
-   to aid in constructing reducers (see the reducers package)
-   monoid, reduced, reducer, folder, mapping, filtering, mapcatting
-   
-** conj & into
-   (conj coll val) -> new collection w/val
-   as in clojure
-      (conj '(a) b) -> (b a)
-      (conj #(a) b) -> #(a b)
 
-   (into coll reduceable) -> new collection
-   essentially == (fold-left #'conj reduceable :initial-value coll)
-    (into #() '(1 2 3)) -> #(1 2 3)
-    (into nil '(1 2 3)) -> (3 2 1)
 * exported symbols
 
   See [[https://github.com/jaeschliman/com.clearly-useful.generic-collection-interface/blob/master/package.lisp][package.lisp]] for a list of all exported symbols.

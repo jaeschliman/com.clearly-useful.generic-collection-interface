@@ -1,0 +1,83 @@
+#+TITLE: simple indexable protocol for common lisp
+
+* com.clearly-useful.indexable-protocol
+
+  a simple vector-like (random access) protocol for common lisp,
+  inspired by clojure, and implementations for it over the built
+  in collection types.
+  
+**  *Overview*:
+
+    This package provides two protocols =countable= and =indexable=.
+    note that =indexable= requires =countable=. They are distinct in
+    that an unordered set may be =countable=, but as it is unordered
+    there is no way to index it directly.
+
+    Default implementations are provided for the built in types,
+    see the com.clearly-useful.generic-collection-interface project
+    for details of this protocol integrates with =seq= and =associative=
+
+**  *Exported Symbols*
+
+*** countable
+    /protocol/
+    the countable protocol
+
+    /type/
+    type of the countable protocol
+
+    /generic function/
+    'conversion' function for the countable protocol.
+    identity for objects implementing countable.
+
+*** countable-p
+    /function/
+    test for the countable protocol
+
+*** counted-p
+    /protocol method/
+    (counted-p o) => boolean
+    whether o can count its contents in constant time. 
+
+*** count-elements
+    /protocol method/
+    (count-elements o) => number
+    the number of elements in o
+
+*** indexable
+    /protocol/
+    the indexable protocol. note that the indexable
+    protocol require the countable protocol.
+
+    /type/
+    the type of the indexable protocol.
+
+    /generic function/
+    'conversion' function for the indexable protocol.
+    identity for indexables, default implementation
+    provided for seq and associative.
+
+*** indexable-p
+    /function/
+    test function for the indexable protocol
+
+*** element-at
+    /protocol method/
+    (element-at o index) => value
+    returns the object at index in o, or throws
+    an error if out of bounds.
+
+*** doindexable
+    /macro/
+    like dolist for indexables.
+    
+* implementation
+
+  This is an interface package. The implementation is in the
+  com.clearly-useful.generic-collection-interface package.
+  
+* notes & todos
+  
+** TODO add tests specific to this package
+   
+   

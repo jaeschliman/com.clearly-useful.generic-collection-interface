@@ -1,0 +1,3 @@
+collection abstraction after watching clojure reducers talk.
+
+not sure what to put here yet. 
