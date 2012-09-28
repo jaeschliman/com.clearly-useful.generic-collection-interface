@@ -43,9 +43,6 @@
   (counted-p (o) (declare (ignorable o)) nil)
   (count-elements (o) (%count-seq o))
 
-  indexable
-  (element-at (o index) (%seq-nth-or-error o index))
-
   associative
   (all-keys (o) (make-%range :low 0 :high (count-elements o)))
   (all-values (o) o)
