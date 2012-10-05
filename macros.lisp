@@ -10,8 +10,7 @@ similar to dolist."
        (when ,seq
 	 (do* ((,tail ,seq (tail ,tail))
 	       (,var (head ,tail)
-		     (if ,tail (head ,tail)
-			 ,var)))
+		     (head ,tail)))
 	      ((null ,tail)
 	       ,@(when return-clause
 		       (list return-clause)))
@@ -33,7 +32,7 @@ similar to dolist."
        (when (plusp ,count)
 	 (do* ((,i 0 (1+ ,i))
 	       (,var (element-at ,idx ,i)
-		     (if (= ,i ,count) ,var
+		     (if (= ,i ,count) nil ;;like dolist
 			 (element-at ,idx ,i))))
 	      ((= ,i ,count)
 	       ,@(when return-clause
