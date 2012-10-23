@@ -1,5 +1,6 @@
 (in-package :com.clearly-useful.generic-collection-interface)
 
+#+com.clearly-useful.threading-supported
 (defpun fold-vector (v n combiner reducer)
   (cond
     ((= 0 (length v)) (funcall combiner))

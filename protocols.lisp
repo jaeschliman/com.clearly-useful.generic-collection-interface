@@ -32,6 +32,9 @@ associative and seq."
   (head (o) "first element")
   (tail (o) "the rest of the collection or nil"))
 
+;; note: should change the api to be more cl-like.
+;; let value-for-key return 2 values instead of raising.
+
 (defprotocol associative
   "a dictionary-like abstraction"
   (:require collection)

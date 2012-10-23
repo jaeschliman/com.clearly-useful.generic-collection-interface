@@ -97,8 +97,15 @@
   (coll-reduce (self fn seed) (reduce fn self :initial-value seed))
 
   foldable
+  #+com.clearly-useful.threading-supported
   (coll-fold (self n combinef reducef)
-	     (fold-vector self n combinef reducef)))
+	     (fold-vector self n combinef reducef))
+
+  #-com.clearly-useful.threading-supported
+  (coll-fold (self n combinef reducef)
+	     (declare (ignore n))
+	     (reduce reducef self :initial-value (funcall combinef)))
+  )
 
 (extend-type array
   ;;should this retain the dimensionality of array
