@@ -212,4 +212,10 @@
 (assert (not (typep *a-hash-table* 'seq)))
 (assert (= 3 (count-elements (seq *a-hash-table*))))
 
+;;;; hash table into/conj
 
+(let* ((vals '((a 1) (b 2) (c 3)))
+       (tbl (into (make-hash-table) vals)))
+  (doseq (list vals)
+    (assert (eql (value-for-key tbl (car list))
+		 (cadr list)))))

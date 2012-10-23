@@ -33,6 +33,13 @@
 	       ;; TODO : add other options ?
 	       ))
 
+(defun %dup-hash (it)
+  (let ((new (%empty-hash it)))
+    (maphash (lambda (k v)
+	       (setf (gethash k new) v))
+	     it)
+    new))
+
 
 (defun %interface-package (name
 			   documentation
