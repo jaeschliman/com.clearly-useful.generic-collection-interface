@@ -153,6 +153,17 @@ the lower bound of range, or nil"
        unless tail do (lose)
        finally (return (head tail)))))
 
+(defun %seq-nth-or-nil-with-values (seq n)
+  (let ((foundp nil))
+    (values
+     (loop for i below (1+ n)
+	 for tail = seq then (tail tail)
+	 unless tail do (return nil)
+	 finally (progn
+		   (setf foundp t)
+		   (return (head tail))))
+     foundp)))
+
 (defun %seq-to-list (seq)
   (let ((result (list)))
     (doseq (o seq (nreverse result))

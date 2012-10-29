@@ -22,7 +22,7 @@
   (all-keys (o) nil)
   (all-values (o) nil)
   (contains-key-p (o k) (declare (ignorable o k)) nil)
-  (value-for-key (o k) (%seq-nth-or-error o k)) ;;to give the right error message
+  (value-for-key (o k) (values nil nil)) 
 
   reduceable
   (coll-reduce (self fn seed) (declare (ignorable self)
@@ -50,7 +50,7 @@
 		  (and (integerp key))
 		  (<= -1 key (count-elements o)))
   (value-for-key (o index)
-		 (%seq-nth-or-error o index))
+		 (%seq-nth-or-nil-with-values o index))
 
   reduceable
   (coll-reduce (self fn seed)
@@ -91,7 +91,9 @@
 		  (and (integerp key)
 		       (<= -1 key (length it))))
   (value-for-key (it key)
-		 (elt it key))
+		 (if (contains-key-p it key)
+		     (values (elt it key) t)
+		     (values nil nil)))
 
   reduceable
   (coll-reduce (self fn seed) (reduce fn self :initial-value seed))
@@ -140,6 +142,13 @@
 			       :displaced-index-offset 0
 			       :element-type
 			       (array-element-type it)))
+  (contains-key-p (it key)
+		  (and (integerp key)
+		       (<= -1 key (array-total-size it))))
+  (value-for-key (it key)
+		 (if (contains-key-p it key)
+		     (values (row-major-aref it key) t)
+		     (values nil nil)))
 
   reduceable
   (coll-reduce (self fn seed)
@@ -181,10 +190,7 @@
   (contains-key-p (o k)
 		  (nth-value 1 (gethash k o)))
   (value-for-key (o k)
-		 (if (contains-key-p o k)
-		     (prog1 (gethash k o))
-		     (error "no such key ~S in ~S"
-			    k o)))
+		 (gethash k o))
 
   reduceable
   (coll-reduce (self fn seed)

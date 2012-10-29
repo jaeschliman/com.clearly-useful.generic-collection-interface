@@ -80,10 +80,12 @@
 
 ** value-for-key
    /protocol method/
-   (value-for-key object key) => value
-   returns the value of key in object, or
-   raises an error
-
+   (value-for-key object key) => (values t bool)
+   returns the value of key in object, and t,
+   or values nil nil (similar to gethash without
+   the optional parameter)
+   
+   
 ** all-keys-and-values
    /generic function/
    (all-keys-and-values o) => seq of (key value), or nil
