@@ -12,17 +12,17 @@
 ;;;;;;; some mock types to ensure the translation functions
 ;;;;;;; work correctly.
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  
-  ; seq 
-  (defstruct kons
+
+
+;; seq 
+(defstruct kons
     kar kdr)
   
-  ; indexable
-  (defstruct vektor v)
+;; indexable
+(defstruct vektor v)
   
-  ; associative
-  (defstruct dikt v))
+;; associative
+(defstruct dikt v)
 
 ;; constructors
 

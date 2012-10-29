@@ -5,12 +5,10 @@
 
 ;;;an integer range
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defstruct %range
+ (defstruct %range
     "an immutable integer range from
 low to high, exclusive."
-    low high))
-
+    low high)
 
 (defun %range-size (range)
   "the number of elements in a range"
@@ -56,9 +54,8 @@ the lower bound of range, or nil"
 ;;;;;; NOTE: the following needs must get converted from
 ;;;;;; 'countable' to 'indexable'
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defstruct %countable-sequence
-    length index countable))
+(defstruct %countable-sequence
+    length index countable)
 
 (defun %countable-sequence-size (c)
   (- (%countable-sequence-length c)
@@ -97,9 +94,9 @@ the lower bound of range, or nil"
 
 ;;;;convert a countable to an associative:
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defstruct %countable-associative
-    length countable))
+(defstruct %countable-associative
+    length countable)
+
 
 (defun %countable-to-associative (countable)
   (make-%countable-associative
@@ -171,13 +168,12 @@ the lower bound of range, or nil"
 
 ;;;;; convert a seq to a countable:
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defstruct %seq-countable
+(defstruct %seq-countable
     seq
     ubound ;;highest index known to be valid
     fully-counted ;;when fully counted
                   ;;ubound == count - 1
-    ))
+    )
 
 (defun %seq-countable-contains-index (sc index)
   (if (%seq-countable-fully-counted sc)
