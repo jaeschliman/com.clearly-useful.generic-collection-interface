@@ -2,6 +2,10 @@
 
 * overview
 
+  Warning:
+  This system is not yet at 1.0, and the interfaces will change as
+  I use them more and work out design problems. Buyer beware!
+  
   This system provides several related protocols and a few functions
   for collection manipulation in common lisp, and implementations for
   built-in types. It includes an interface for clojure-style reducers.
@@ -120,11 +124,7 @@
   one of the three major protocols & confirms that they translate
   among each other correctly.
 
-** TODO fix warning on sbcl
-   (doseq (x #(0 1 2) (* x x))
-      (declare (type fixnum x)))
-   is generating what appear to be useless type
-   warnings at the moment. (with or without the declare)
+
 ** TODO fix hash-table weakness
    (empty h-t) not yet aware of hash table weakness
 
