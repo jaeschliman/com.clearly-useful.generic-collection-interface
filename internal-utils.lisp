@@ -43,7 +43,7 @@
 
 (defun %interface-package (name
 			   documentation
-			   &rest exports)
+			   exports)
   (let ((master (intern (package-name *package*)
 			:keyword))
 	(name (intern (string name)
@@ -58,4 +58,4 @@
   "create a package named name with documentation
 which uses :cl and *package*, exporting the symbols
 of exports."
-  (apply #'%interface-package name documentation exports))
+  (%interface-package name documentation exports))

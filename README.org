@@ -124,10 +124,17 @@
   one of the three major protocols & confirms that they translate
   among each other correctly.
 
-
+** TODO update docs
+** TODO factor out the reducers stuff
+   doing so will:
+   - remove dependency on threading libs
+   - reduce the export count on com.c-u.g-c-i
+** TODO build the gci 'user' system
+   - flesh out the stuff in ext + others
+   - become the home for conj, into, etc.
 ** TODO fix hash-table weakness
    (empty h-t) not yet aware of hash table weakness
-
+   - trivial-garbage?
 ** TODO write examples/demo, more docs
    better to factor them out among the
    sub-packages

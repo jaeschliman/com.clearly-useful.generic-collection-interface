@@ -2,17 +2,34 @@
 
 (defpackage #:com.clearly-useful.generic-collection-interface
   (:use #:cl
+        #:alexandria
 	#:com.clearly-useful.protocols
 	#:lparallel)
-
+  
+  (:nicknames #:com.clearly-useful.gci)
+  
   (:export
    ;;the collection protocol
    #:collection
    #:collection-p
    #:empty
    #:empty-p
+   #:in
    )
   
+  (:export
+   ;; the countable and indexable protocols
+   #:counted-collection
+   #:counted-collection-p
+   #:counted-p
+   #:len
+
+   #:indexed-collection
+   #:indexed-collection-p
+   #:idx
+
+   #:doindexable)
+
   (:export
    ;; the seqable and seq prototocols
    #:seqable
@@ -21,36 +38,24 @@
    #:seq
 
    #:seq-p
-   #:head
-   #:tail
+   #:fst
+   #:rst
    
    #:doseq
-   #:seq-to-list)
+   #:seq-to-list
+   #:to-list)
 
   (:export
    ;; the associative protocol
-   #:associative
-   #:all-keys
-   #:all-values
-   #:contains-key-p
-   #:value-for-key
+   #:associative-collection
+   #:associative-collection-p
+   #:keys
+   #:vals
+   #:key
 
    #:all-keys-and-values
    #:getkey)
   
-  (:export
-   ;; the countable and indexable protocols
-   #:countable
-   #:countable-p
-   #:counted-p
-   #:count-elements
-
-   #:indexable
-   #:indexable-p
-   #:element-at
-
-   #:doindexable)
-
    (:export
    ;;utilities
    #:conj

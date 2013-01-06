@@ -3,36 +3,32 @@
 ;; countable
 
 (defmethod counted-p (thing)
-  (counted-p (countable thing)))
+  (counted-p (counted-collection thing)))
 
-(defmethod count-elements (thing)
-  (count-elements (countable thing)))
+(defmethod len (thing)
+  (len (counted-collection thing)))
 
 ;; indexable
 
-(defmethod element-at (thing n)
-  (element-at (indexable thing) n))
+(defmethod idx (thing n)
+  (idx (indexed-collection thing) n))
 
 ;; seq
 
-(defmethod head (thing)
-  (head (seq thing)))
+(defmethod fst (thing)
+  (fst (seq thing)))
 
-
-(defmethod tail (thing)
-  (tail (seq thing)))
+(defmethod rst (thing)
+  (rst (seq thing)))
 
 ;; associative
 
-(defmethod all-keys (thing)
-  (all-keys (associative thing)))
+(defmethod keys (thing)
+  (keys (associative-collection thing)))
 
-(defmethod all-values (thing)
-  (all-values (associative thing)))
+(defmethod vals (thing)
+  (vals (associative-collection thing)))
 
-(defmethod contains-key-p (thing k)
-  (contains-key-p (associative thing) k))
-
-(defmethod value-for-key (thing k)
-  (value-for-key (associative thing) k))
+(defmethod key (thing k)
+  (key (associative-collection thing) k))
 

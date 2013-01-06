@@ -7,67 +7,72 @@
   #:collection
   #:collection-p
   #:empty
-  #:empty-p)
+  #:empty-p
+  #:in)
 
-(define-interface-package #:com.clearly-useful.sequence-protocol
+(define-interface-package #:com.clearly-useful.seq-protocol
     "Interface to the sequence protocol"
   #:collection
   #:collection-p
   #:empty
   #:empty-p
+  #:in
   
   #:seqable
   #:seqable-p
   #:seq
   #:seq-p
-  #:head
-  #:tail
+  #:fst
+  #:rst
   
   #:doseq
   #:seq-to-list)
 
-(define-interface-package #:com.clearly-useful.countable-protocol
+(define-interface-package #:com.clearly-useful.counted-collection-protocol
     "Interface to the countable protocol"
   #:collection
   #:collection-p
   #:empty
   #:empty-p
+  #:in
   
-  #:countable
-  #:countable-p
+  #:counted-collection
   #:counted-p
-  #:count-elements)
+  #:counted-p
+  #:len)
 
-(define-interface-package #:com.clearly-useful.indexable-protocol
+(define-interface-package #:com.clearly-useful.indexed-collection-protocol
     "Interface to the indexable protocol"
   #:collection
   #:collection-p
   #:empty
   #:empty-p
+  #:in
   
-  #:countable
-  #:countable-p
+  #:counted-collection
+  #:counted-collection-p
   #:counted-p
-  #:count-elements
+  #:len
   
-  #:indexable
-  #:indexable-p
-  #:element-at
+  #:indexed-collection
+  #:indexed-collection-p
+  #:idx
   
   #:doindexable)
 
-(define-interface-package #:com.clearly-useful.associative-protocol
+(define-interface-package #:com.clearly-useful.associative-collection-protocol
     "Interface to the associative protocol"
   #:collection
   #:collection-p
   #:empty
   #:empty-p
+  #:in
   
-  #:associative
-  #:all-keys
-  #:all-values
-  #:contains-key-p
-  #:value-for-key
+  #:associative-collection
+  #:associative-collection-p
+  #:keys
+  #:vals
+  #:key
   
   #:all-keys-and-values
   #:getkey)

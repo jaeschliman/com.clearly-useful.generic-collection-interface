@@ -71,15 +71,18 @@
   collection
   (empty (o) *knil*)
   (empty-p (o) (eq o *knil*))
+  (in (o v) (doseq (q o nil)
+              (when (equalp q v)
+                (return-from in t))))
   
   seqable
   (seq (o) (unless (eq o *knil*)
 	     o))
   seq
-  (head (o) (kar o))
-  (tail (o) (let ((v (kdr o)))
-	      (unless (eq v *knil*)
-		v))))
+  (fst (o) (kar o))
+  (rst (o) (let ((v (kdr o)))
+             (unless (eq v *knil*)
+               v))))
 
 (assert (seq (liszt 1 2 3)))
 (assert (equalp '(1 2 3)
@@ -90,41 +93,30 @@
   collection
   (empty (o) (declare (ignorable o)) (vektor))
   (empty-p (o) (empty-p (vektor-v o)))
+  (in (o val) (in (vektor-v o) val))
 
-  countable
+  counted-collection
   (counted-p (o) (declare (ignorable o)) t)
-  (count-elements (o) (length (vektor-v o)))
+  (len (o) (length (vektor-v o)))
 
-  indexable
-  (element-at (o n) (elt (vektor-v o) n)))
+  indexed-collection
+  (idx (o n) (elt (vektor-v o) n)))
 
-(assert (= 3 (count-elements (vektor 1 2 3))))
+(assert (= 3 (len (vektor 1 2 3))))
 
 
 (extend-type dikt
   collection
   (empty (o) (declare (ignorable o)) (dikt))
   (empty-p (o) (empty-p (dikt-v o)))
+  (in (o k) (in (dikt-v o) k))
   
-  associative
-  (all-keys (o)
-	    (loop for k being
-	       the hash-keys
-	       of (dikt-v o)
-	       collect k))
-  (all-values (o)
-	      (loop for v being
-		 the hash-values
-		 of (dikt-v o)
-		 collect v))
-  (contains-key-p (o k)
-		  (nth-value 1 (gethash k (dikt-v o))))
-  (value-for-key (o k)
-		 (if (contains-key-p o k)
-		     (prog1 (gethash k (dikt-v o)))
-		     (error "bad key"))))
+  associative-collection
+  (keys (o) (keys (dikt-v o)))
+  (vals (o) (vals (dikt-v o)))
+  (key (o k) (key (dikt-v o) k)))
 
-(assert (contains-key-p (dikt 1 2 3 4) 1))
+(assert (in (dikt 1 2 3 4) 1))
 
 ;;;; check our a b c's
 
@@ -150,37 +142,37 @@
 
 (defun seq-abc (seq)
   (assert (null (seq (empty seq))))
-  (assert (eq 'a (head seq)))
-  (assert (eq 'b (head (tail seq))))
+  (assert (eq 'a (fst seq)))
+  (assert (eq 'b (fst (rst seq))))
   (assert (sequal '(a b c) seq)))
 
 (defun count-abc (count)
-  (assert (= 3 (count-elements count)))
-  (assert (eq 'b (element-at count 1))))
+  (assert (= 3 (len count)))
+  (assert (eq 'b (idx count 1))))
 
 (defun assoc-abc (assoc &optional
 			  (keys '(a b c))
 			  (vals '(1 2 3)))
-  (assert (set-sequal keys (all-keys assoc)))
-  (assert (set-sequal vals (all-values assoc)))
-  (assert (contains-key-p assoc (head keys))))
+  (assert (set-sequal keys (keys assoc)))
+  (assert (set-sequal vals (vals assoc)))
+  (assert (in assoc (fst keys))))
 
 ;;;; seq conversions
 
 (seq-abc *a-kons*)
 
-(count-abc (indexable *a-kons*))
+(count-abc (indexed-collection *a-kons*))
 
-(assoc-abc (associative *a-kons*)
+(assoc-abc (associative-collection *a-kons*)
 	   '(0 1 2)
 	   '(a b c))
 
 
 (seq-abc *a-cons*)
 
-(count-abc (indexable *a-cons*))
+(count-abc (indexed-collection *a-cons*))
 
-(assoc-abc (associative *a-cons*)
+(assoc-abc (associative-collection *a-cons*)
 	   '(0 1 2)
 	   '(a b c))
 
@@ -190,7 +182,7 @@
 
 (seq-abc (seq *a-vektor*))
 
-(assoc-abc (associative *a-vektor*)
+(assoc-abc (associative-collection *a-vektor*)
 	   '(0 1 2)
 	   '(a b c))
 
@@ -198,7 +190,7 @@
 
 (seq-abc (seq *a-vector*))
 
-(assoc-abc (associative *a-vector*)
+(assoc-abc (associative-collection *a-vector*)
 	   '(0 1 2)
 	   '(a b c))
 
@@ -206,16 +198,16 @@
 
 (assoc-abc *a-dikt*)
 (assert (not (typep *a-dikt* 'seq)))
-(assert (= 3 (count-elements (seq *a-dikt*))))
+(assert (= 3 (len (seq *a-dikt*))))
 
 (assoc-abc *a-hash-table*)
 (assert (not (typep *a-hash-table* 'seq)))
-(assert (= 3 (count-elements (seq *a-hash-table*))))
+(assert (= 3 (len (seq *a-hash-table*))))
 
 ;;;; hash table into/conj
 
 (let* ((vals '((a 1) (b 2) (c 3)))
        (tbl (into (make-hash-table) vals)))
   (doseq (list vals)
-    (assert (eql (value-for-key tbl (car list))
+    (assert (eql (key tbl (car list))
 		 (cadr list)))))

@@ -4,17 +4,15 @@
 (defmacro doseq ((var form &optional return-clause) &body body)
   "   bind var to each item in (seq form) and execute body.
 similar to dolist."
-  (let ((seq (gensym))
-	(tail (gensym)))
-    `(let ((,seq (seq ,form)))
-       (when ,seq
-	 (do* ((,tail ,seq (tail ,tail))
-	       (,var (head ,tail)
-		     (head ,tail)))
-	      ((null ,tail)
-	       ,@(when return-clause
-		       (list return-clause)))
-	   ,@body)))))
+  (with-gensyms (seq tail)
+    `(when-let (,seq (seq ,form))
+       (do* ((,tail ,seq (rst ,tail))
+             (,var (fst ,tail)
+                   (fst ,tail)))
+            ((null ,tail)
+             ,@(when return-clause
+                     (list return-clause)))
+         ,@body))))
 
 
 (defmacro doindexable ((var form &optional return-clause) &body body)
@@ -23,21 +21,18 @@ and execute body.
 where n is 0..(count-elements indexed)
       and indexed is (indexable form)
 similar to dolist."
-  (let ((idx (gensym))
-	(i (gensym))
-	(count (gensym)))
-    `(let* ((,idx (indexable ,form))
-	    (,count (count-elements ,idx))
-	    )
+  (with-gensyms (idx i count)
+    `(let* ((,idx (indexed-collection ,form))
+            (,count (len ,idx)))
        (when (plusp ,count)
-	 (do* ((,i 0 (1+ ,i))
-	       (,var (element-at ,idx ,i)
-		     (if (= ,i ,count) nil ;;like dolist
-			 (element-at ,idx ,i))))
-	      ((= ,i ,count)
-	       ,@(when return-clause
-		       (list return-clause)))
-	   ,@body)))))
+         (do* ((,i 0 (1+ ,i))
+               (,var (idx ,idx ,i)
+                     (if (= ,i ,count) nil ;;like dolist
+                         (idx ,idx ,i))))
+              ((= ,i ,count)
+               ,@(when return-clause
+                       (list return-clause)))
+           ,@body)))))
 
 
 

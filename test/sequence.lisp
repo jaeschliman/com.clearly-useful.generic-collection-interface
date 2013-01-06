@@ -6,12 +6,12 @@
 ;; the generic collection interface. this file should test
 ;; only what can be done with the package in this system
 
-(defpackage #:com.clearly-useful.sequence-protocol.test
+(defpackage #:com.clearly-useful.seq-protocol.test
   (:use #:cl
 	;;;should be testing .sequence-protocol
 	#:com.clearly-useful.generic-collection-interface))
 
-(in-package #:com.clearly-useful.sequence-protocol.test)
+(in-package #:com.clearly-useful.seq-protocol.test)
 
 (defmacro with-collector ((&optional (collector-name 'collect)) &body body)
   (let ((result (gensym)))
@@ -27,10 +27,10 @@ that respond to equalp. seqs will respond to indexable as well."
   (assert (seqable-p seqable-object))
   (let ((object (seq seqable-object)))
     (assert (seq-p object))
-    (assert (equalp (head object) expected-head))
-    (assert (equalp (tail object) expected-tail))
+    (assert (equalp (fst object) expected-head))
+    (assert (equalp (rst object) expected-tail))
     (let ((as-list (seq-to-list object))
-	  (length (count-elements object)))
+	  (length (len object)))
       ;;counts ok
       (assert (= length
 		 (list-length as-list)))
@@ -38,7 +38,7 @@ that respond to equalp. seqs will respond to indexable as well."
       (loop
 	 for i below length
 	 for o in as-list
-	 do (assert (equalp o (element-at object i)))))))
+	 do (assert (equalp o (idx object i)))))))
 
 
 (defun mapply (fn list)
@@ -89,9 +89,9 @@ clause, ala dolist"
 ;;this test doesn't make as much sense
 ;;anymore
 (defun test-count-seq ()
-  (assert (= (count-elements '(a #(b c)))
+  (assert (= (len '(a #(b c)))
 	     2))
-  (assert (= (count-elements '(a . #(b c)))
+  (assert (= (len '(a . #(b c)))
 	     3)))
 
 (test-count-seq)

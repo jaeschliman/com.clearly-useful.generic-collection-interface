@@ -6,7 +6,7 @@
   adjustable-vector)
 
 (defun %hash-conj! (ht seq)
-  (setf (gethash (head seq) ht) (head (tail seq)))
+  (setf (gethash (fst seq) ht) (fst (rst seq)))
   ht)
 
 (defgeneric conj (a val)

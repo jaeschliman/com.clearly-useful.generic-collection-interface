@@ -4,25 +4,25 @@
   collection
   (empty (o) nil)
   (empty-p (o) t)
+  (in (o v) (declare (ignore v)) nil)
   
   seqable
   (seq (o) nil)
   seq
-  (head (o) nil)
-  (tail (o) nil)
+  (fst (o) nil)
+  (rst (o) nil)
 
-  countable
+  counted-collection
   (counted-p (o) t)
-  (count-elements (o) 0)
+  (len (o) 0)
 
-  indexable
-  (element-at (o index) (%seq-nth-or-error o index))
+  indexed-collection
+  (idx (o index) (%seq-nth-or-error o index))
 
-  associative
-  (all-keys (o) nil)
-  (all-values (o) nil)
-  (contains-key-p (o k) (declare (ignorable o k)) nil)
-  (value-for-key (o k) (values nil nil)) 
+  associative-collection
+  (keys (o) nil)
+  (vals (o) nil)
+  (key (o k) (declare (ignore k)) (values nil nil)) 
 
   reduceable
   (coll-reduce (self fn seed) (declare (ignorable self)
@@ -32,25 +32,20 @@
   collection
   (empty (o) nil)
   (empty-p (o) nil)
+  (in (o v)
+      (doseq (x o nil)
+        (when (equalp x v)
+          (return-from in t))))
   
   seqable
   (seq (o) o)
   seq
-  (head (o) (car o))
-  (tail (o) (cdr o))
+  (fst (o) (car o))
+  (rst (o) (seq (cdr o)))
 
-  countable
+  counted-collection
   (counted-p (o) (declare (ignorable o)) nil)
-  (count-elements (o) (%count-seq o))
-
-  associative
-  (all-keys (o) (make-%range :low 0 :high (count-elements o)))
-  (all-values (o) o)
-  (contains-key-p (o key)
-		  (and (integerp key))
-		  (<= -1 key (count-elements o)))
-  (value-for-key (o index)
-		 (%seq-nth-or-nil-with-values o index))
+  (len (o) (%count-seq o))
 
   reduceable
   (coll-reduce (self fn seed)
@@ -64,37 +59,33 @@
   (empty (it) (make-array 0
 			  :element-type (array-element-type it)))
   (empty-p (it) (zerop (length it)))
+  (in (it v) (find v it :test #'equalp))
   
+
+;;;;;;this should return an actual list-like structure.
+  ;;;;it was cool playing with the displaced-arrays, but
+  ;;;;it's not clear, or practical
   seqable
   (seq (it) (when (plusp (length it))
 	      it))
+
+  
   seq
-  (head (it) (elt it 0))
-  (tail (it) (let ((len (1- (length it))))
+  (fst (it) (elt it 0))
+  (rst (it) (let ((len (1- (length it))))
 	       (unless (zerop len)
 		 (make-array len
 			     :displaced-to it
 			     :displaced-index-offset 1
 			     :element-type
 			     (array-element-type it)))))
-  countable
+  counted-collection
   (counted-p (it) t)
-  (count-elements (it) (length it))
+  (len (it) (length it))
 
-  indexable
-  (element-at (it n) (elt it n))
+  indexed-collection
+  (idx (it n) (elt it n))
   
-  associative
-  (all-keys (it) (make-%range :low 0 :high (length it)))
-  (all-values (it) it)
-  (contains-key-p (it key)
-		  (and (integerp key)
-		       (<= -1 key (length it))))
-  (value-for-key (it key)
-		 (if (contains-key-p it key)
-		     (values (elt it key) t)
-		     (values nil nil)))
-
   reduceable
   (coll-reduce (self fn seed) (reduce fn self :initial-value seed))
 
@@ -119,7 +110,9 @@
 				     :initial-element 0)
 			  :element-type (array-element-type it)))
   (empty-p (it) (zerop (array-total-size it)))
-  
+  (in (it key)
+      (and (non-negative-integer-p key)
+           (< key (array-total-size it))))
   seqable
   (seq (it) (when (plusp (array-total-size it))
 	      (make-array (array-total-size it)
@@ -128,28 +121,28 @@
 			  :element-type
 			  (array-element-type it))))
   
-  countable
+  counted-collection
   (counted-p (it) t)
-  (count-elements (it) (array-total-size it))
+  (len (it) (array-total-size it))
 
-  indexable
-  (element-at (it n) (row-major-aref it n))
+  indexed-collection
+  (idx (it n) (row-major-aref it n))
 
-  associative
-  (all-keys (it) (make-%range :low 0 :high (array-total-size it)))
-  (all-values (it) (make-array (array-total-size it)
+  #|
+  associative-collection
+  (keys (it) (make-%range :low 0 :high (array-total-size it)))
+  (vals (it) (make-array (array-total-size it)
 			       :displaced-to it
 			       :displaced-index-offset 0
 			       :element-type
 			       (array-element-type it)))
-  (contains-key-p (it key)
-		  (and (integerp key)
-		       (<= -1 key (array-total-size it))))
-  (value-for-key (it key)
+  
+  (key (it key)
 		 (if (contains-key-p it key)
 		     (values (row-major-aref it key) t)
 		     (values nil nil)))
-
+|#
+  
   reduceable
   (coll-reduce (self fn seed)
 	       (reduce fn (make-array (array-total-size self)
@@ -170,27 +163,20 @@
   collection
   (empty (it) (%empty-hash it))
   (empty-p (it) (zerop (hash-table-count it)))
+  (in (o k) (nth-value 1 (gethash k o)))
   
   seqable
   (seq (it) (when (plusp (hash-table-count it))
 	      (all-keys-and-values it)))
-  countable
-  (counted-p (it) t)
-  (count-elements (it) (hash-table-count it))
 
-  associative
-  (all-keys (it)
-	    (loop for k being
-	       the hash-keys of it
-	       collect k))
-  (all-values (it)
-	      (loop for v being
-		 the hash-values of it
-		 collect v))
-  (contains-key-p (o k)
-		  (nth-value 1 (gethash k o)))
-  (value-for-key (o k)
-		 (gethash k o))
+  counted-collection
+  (counted-p (it) t)
+  (len (it) (hash-table-count it))
+
+  associative-collection
+  (keys (it) (hash-table-keys it))
+  (vals (it) (hash-table-values it))
+  (key (o k) (gethash k o))
 
   reduceable
   (coll-reduce (self fn seed)

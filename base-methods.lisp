@@ -5,41 +5,41 @@
 
 (defmethod seq (o)
   (etypecase o
-    (associative (seq (all-keys-and-values o)))
-    (indexable (%countable-to-seq o))
+    (associative-collection (seq (all-keys-and-values o)))
+    (indexed-collection (%indexable-to-seq o))
     (t (error "no method to convert ~S ~S to ~S"
 	      (class-of o) o 'seq))))
 
-(defmethod associative (o)
+(defmethod associative-collection (o)
   (etypecase o
-    (indexable
-     (%countable-to-associative o))
+    (indexed-collection
+     (%indexable-to-associative o))
     (seq (%seq-to-associative o))
     (t (error "no method to convert ~S ~S to ~S"
-	      (class-of o) o 'associative))))
+	      (class-of o) o 'associative-collection))))
 
-(defmethod indexable (o)
+(defmethod indexed-collection (o)
   (etypecase o
-    (seq (%seq-to-countable o))
-    (associative (%associative-to-indexable o))
+    (seq (%seq-to-indexable o))
+    (associative-collection (%associative-to-indexable o))
     (t (error "no method to convert ~S ~S to ~S"
-	      (class-of o) o 'indexable))))
+	      (class-of o) o 'indexed-collection))))
 
-(defmethod countable (o)
+(defmethod counted-collection (o)
   (etypecase o
-    (seq (%seq-to-countable o))
-    (associative (%seq-to-countable (seq o)))
+    (seq (%seq-to-indexable o))
+    (associative (%seq-to-indexable (seq o)))
     (t (error "no method to convert ~S ~S to ~S"
-	      (class-of o) o 'countable))))
+	      (class-of o) o 'counted-collection))))
 
 
 (defmethod coll-reduce (self fn seed)
    (etypecase self
-     (indexable (if (counted-p self)
-		    (reduce-indexable self fn seed)
-		    (reduce-seq (seq self) fn seed)))
+     (indexed-collection (if (counted-p self)
+                             (reduce-indexable self fn seed)
+                             (reduce-seq (seq self) fn seed)))
      (seq (reduce-seq self fn seed))
-     (associative (reduce-seq (seq self) fn seed))
+     (associative-collection (reduce-seq (seq self) fn seed))
      (t (error "Don't know how to ~S ~S" 'coll-reduce self))))
 
 (defmethod coll-fold (self n cm rd)

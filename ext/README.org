@@ -1,0 +1,7 @@
+#+TITLE: gci extensions
+
+this is just light work in progress. none of the code
+in this directory is actually loaded by the parent system.
+eventually an actual 'com.clearly-useful.gci' system will
+emerge that includes things like these, and functions to
+operate on collections etc.

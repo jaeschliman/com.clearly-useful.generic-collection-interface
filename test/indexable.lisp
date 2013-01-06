@@ -1,6 +1,6 @@
 (defpackage #:com.clearly-useful.indexable-protocol.test
   (:use #:cl
-	#:com.clearly-useful.indexable-protocol))
+	#:com.clearly-useful.indexed-collection-protocol))
 
 (in-package #:com.clearly-useful.indexable-protocol.test)
 

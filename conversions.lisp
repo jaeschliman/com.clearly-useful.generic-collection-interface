@@ -5,7 +5,7 @@
 
 ;;;an integer range
 
- (defstruct %range
+(defstruct %range
     "an immutable integer range from
 low to high, exclusive."
     low high)
@@ -27,114 +27,111 @@ the lower bound of range, or nil"
   collection
   (empty (range) (make-%range :low 0 :high 0))
   (empty-p (range) (not (plusp (%range-size range))))
+  (in (range val)
+      (and (integerp val)
+           (<= (%range-low range) val (1- (%range-high range)))))
   
   seqable
   (seq (range) (when (plusp (%range-size range))
 		 range))
   seq
-  (head (range) (%range-low range))
-  (tail (range) (%next-range range))
+  (fst (range) (%range-low range))
+  (rst (range) (%next-range range))
 
-  countable
+  counted-collection
   (counted-p (range) t)
-  (count-elements (range) (%range-size range))
+  (len (range) (%range-size range))
 
-  indexable
-  (element-at (range index)
-	      (if (and
-		   (integerp index)
-		   (<= (%range-low range) index)
-		   (< index (%range-high range)))
-		  (+ (%range-low range) index)
-		  (error "~S is an invalid index for ~S" index range))))
+  indexed-collection
+  (idx (range index)
+       (if (in range index)
+           (+ (%range-low range) index)
+           (error "~S is an invalid index for ~S" index range))))
 
 
-;;;;convert a countable to a seq:
+;;;;convert an indexable to a seq:
 
-;;;;;; NOTE: the following needs must get converted from
-;;;;;; 'countable' to 'indexable'
+(defstruct %indexable-sequence
+    length index indexable)
 
-(defstruct %countable-sequence
-    length index countable)
+(defun %indexable-sequence-size (c)
+  (- (%indexable-sequence-length c)
+     (%indexable-sequence-index c)))
 
-(defun %countable-sequence-size (c)
-  (- (%countable-sequence-length c)
-     (%countable-sequence-index c)))
-
-(defun %next-countable-sequence (c)
-  (let ((length (%countable-sequence-length c))
-	(new-index (1+ (%countable-sequence-index c))))
+(defun %next-indexable-sequence (c)
+  (let ((length (%indexable-sequence-length c))
+	(new-index (1+ (%indexable-sequence-index c))))
     (unless (zerop (- length new-index))
-      (make-%countable-sequence
+      (make-%indexable-sequence
        :length length
        :index new-index
-       :countable (%countable-sequence-countable c)))))
+       :indexable (%indexable-sequence-indexable c)))))
 
-(defun %countable-to-seq (countable)
-  (when (plusp (count-elements countable))
-    (make-%countable-sequence
-     :length (count-elements countable)
+(defun %indexable-to-seq (indexable)
+  (when (plusp (len indexable))
+    (make-%indexable-sequence
+     :length (len indexable)
      :index 0
-     :countable countable)))
+     :indexable indexable)))
 
-(extend-type %countable-sequence
+(extend-type %indexable-sequence
   collection
-  (empty (c) (%countable-to-seq (empty (%countable-sequence-countable c))))
-  (empty-p (c) (empty-p (%countable-sequence-countable c)))
+  (empty (c) (%indexable-to-seq (empty (%indexable-sequence-indexable c))))
+  (empty-p (c) (empty-p (%indexable-sequence-indexable c)))
+  (in (c v) (in (%indexable-sequence-indexable c) v))
   
   seqable
-  (seq (c) (when (plusp (%countable-sequence-size c))
+  (seq (c) (when (plusp (%indexable-sequence-size c))
 	     c))
   seq
-  (head (c) (element-at (%countable-sequence-countable c)
-			(%countable-sequence-index c)))
-  (tail (c) (%next-countable-sequence c)))
+  (fst (c) (idx (%indexable-sequence-indexable c)
+			(%indexable-sequence-index c)))
+  (rst (c) (%next-indexable-sequence c)))
 
 
 
-;;;;convert a countable to an associative:
+;;;;convert a indexable to an associative:
 
-(defstruct %countable-associative
-    length countable)
+(defstruct %indexable-associative
+    length indexable)
 
 
-(defun %countable-to-associative (countable)
-  (make-%countable-associative
-   :length (count-elements countable)
-   :countable countable))
+(defun %indexable-to-associative (indexable)
+  (make-%indexable-associative
+   :length (len indexable)
+   :indexable indexable))
 
-(extend-type %countable-associative
+(extend-type %indexable-associative
   collection
   (empty (o)
-	 (%countable-to-associative
-	  (empty (%countable-associative-countable o))))
+	 (%indexable-to-associative
+	  (empty (%indexable-associative-indexable o))))
   (empty-p (o)
-	   (empty-p (%countable-associative-countable o)))
+	   (empty-p (%indexable-associative-indexable o)))
+  (in (o v) (in (keys (%indexable-associative-indexable o)) v))
   
-  associative
-  (all-keys (o) (make-%range :low 0
-			     :high (%countable-associative-length o)))
-  (all-values (o) (%countable-to-seq (%countable-associative-countable o)))
-  (contains-key-p (o key) (and (integerp key)
-			       (< -1 key (%countable-associative-length o))))
-  (value-for-key (o key)
-		 (if (contains-key-p o key)
-		     (element-at (%countable-associative-countable o) key)
-		     (error "~S does not contain key ~S" o key))))
+  associative-collection
+  (keys (o) (make-%range :low 0
+                         :high (%indexable-associative-length o)))
+  (vals (o) (%indexable-to-seq (%indexable-associative-indexable o)))
+  (key (o key)
+       (if (in o key)
+           (values (idx (%indexable-associative-indexable o) key) t)
+           (values nil nil))))
 
 
 ;;;;; seq functions
 
 (defun %count-seq (seq)
   (loop for i from 0
-     for tail = seq then (tail tail)
+     for tail = seq then (rst tail)
      while tail
      finally (return i)))
 
 
 (defun %seq-indexable-by (seq n)
   (loop for i below (1+ n)
-       for tail = seq then (tail tail)
+       for tail = seq then (rst tail)
        unless tail do (return nil)
        finally (return t)))
 
@@ -142,75 +139,73 @@ the lower bound of range, or nil"
 (defun %seq-nth-or-error (seq n)
   (flet ((lose ()
 	   (error "~S is an invalid index for ~S" n seq)))
-    (unless (and (integerp n)
-		 (< -1 n))
+    (unless (non-negative-integer-p n)
       (lose))
     (loop for i below (1+ n)
-       for tail = seq then (tail tail)
+       for tail = seq then (rst tail)
        unless tail do (lose)
-       finally (return (head tail)))))
+       finally (return (fst tail)))))
 
 (defun %seq-nth-or-nil-with-values (seq n)
   (let ((foundp nil))
     (values
-     (loop for i below (1+ n)
-	 for tail = seq then (tail tail)
-	 unless tail do (return nil)
-	 finally (progn
-		   (setf foundp t)
-		   (return (head tail))))
+     (loop for i upto n
+        for tail = seq then (rst tail)
+        unless tail do (return nil)
+        finally (progn
+                  (setf foundp t)
+                  (return (fst tail))))
      foundp)))
 
-(defun %seq-to-list (seq)
-  (let ((result (list)))
-    (doseq (o seq (nreverse result))
-      (push o result))))
 
-;;;;; convert a seq to a countable:
 
-(defstruct %seq-countable
+;;;;; convert a seq to a indexable:
+
+(defstruct %seq-indexable
     seq
     ubound ;;highest index known to be valid
     fully-counted ;;when fully counted
                   ;;ubound == count - 1
     )
 
-(defun %seq-countable-contains-index (sc index)
-  (if (%seq-countable-fully-counted sc)
-      (<= index (%seq-countable-ubound sc))
-      (if (<= index (%seq-countable-ubound sc))
-	  t
-	  (if (%seq-indexable-by (%seq-countable-seq sc) index)
-	      (prog1 t (setf (%seq-countable-ubound sc) index))))))
+(defun %seq-indexable-contains-index (sc index)
+  (cond
+    ((%seq-indexable-fully-counted sc)
+     (<= index (%seq-indexable-ubound sc)))
+    ((<= index (%seq-indexable-ubound sc)) t)
+    ((%seq-indexable-by (%seq-indexable-seq sc) index)
+     (prog1 t (setf (%seq-indexable-ubound sc) index)))))
 
 
-(defun %seq-countable-count (sc)
-  (if (%seq-countable-fully-counted sc)
-      (1+ (%seq-countable-ubound sc))
-      (let ((c (%count-seq (%seq-countable-seq sc))))
+(defun %seq-indexable-count (sc)
+  (if (%seq-indexable-fully-counted sc)
+      (1+ (%seq-indexable-ubound sc))
+      (let ((c (%count-seq (%seq-indexable-seq sc))))
 	(prog1 c
-	  (setf (%seq-countable-ubound sc) (1- c)
-		(%seq-countable-fully-counted sc) t)))))
+	  (setf (%seq-indexable-ubound sc) (1- c)
+		(%seq-indexable-fully-counted sc) t)))))
 
 
-(defun %seq-to-countable (seq)
+(defun %seq-to-indexable (seq)
   (when seq
-    (make-%seq-countable
+    (make-%seq-indexable
      :seq seq
      :ubound -1
      :fully-counted nil)))
 
-(extend-type %seq-countable
+(extend-type %seq-indexable
   collection
-  (empty (o) (%seq-to-countable (empty (%seq-countable-seq o))))
-  (empty-p (o) (empty-p (%seq-countable-seq o)))
+  (empty (o) (%seq-to-indexable (empty (%seq-indexable-seq o))))
+  (empty-p (o) (empty-p (%seq-indexable-seq o)))
+  (in (o v) (and (non-negative-integer-p v)
+                 (%seq-indexable-contains-index o v))) 
   
-  countable
+  counted-collection
   (counted-p (o) (declare (ignore o)) nil)
-  (count-elements (o) (%seq-countable-count o))
+  (len (o) (%seq-indexable-count o))
 
-  indexable
-  (element-at (o index) (%seq-nth-or-error (%seq-countable-seq o) index)))
+  indexed-collection
+  (idx (o index) (%seq-nth-or-error (%seq-indexable-seq o) index)))
 
 
 
@@ -218,8 +213,8 @@ the lower bound of range, or nil"
 
 
 (defun %seq-to-associative (seq)
-  (%countable-to-associative (%seq-to-countable seq)))
+  (%indexable-to-associative (%seq-to-indexable seq)))
 
 ;;;; convert associative to indexable:
 (defun %associative-to-indexable (assoc)
-  (%seq-to-countable (all-keys-and-values assoc)))
+  (%seq-to-indexable (all-keys-and-values assoc)))
